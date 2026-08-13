@@ -4,6 +4,7 @@ import com.example.capcatalog.document.ProductDocument;
 import com.example.capcatalog.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,18 +28,131 @@ public class ProductService {
             return getAllProducts();
         }
 
-        String searchText = texto.toLowerCase();
+        String searchText = normalizeText(texto);
+
+        String[] searchTokens = searchText
+                .split("\\s+");
 
         return getAllProducts()
                 .stream()
-                .filter(product ->
-                        product.getNombre().toLowerCase().contains(searchText) ||
-                        product.getDescripcion().toLowerCase().contains(searchText) ||
-                        product.getCategoria().toLowerCase().contains(searchText) ||
-                        product.getColor().toLowerCase().contains(searchText) ||
-                        product.getTipo().toLowerCase().contains(searchText)
-                )
+                .filter(product -> matchesProduct(product, searchTokens))
                 .toList();
+    }
+
+    private boolean matchesProduct(ProductDocument product, String[] searchTokens) {
+        String searchableText = normalizeText(
+                safe(product.getNombre()) + " " +
+                safe(product.getDescripcion()) + " " +
+                safe(product.getCategoria()) + " " +
+                safe(product.getColor()) + " " +
+                safe(product.getTipo()) + " " +
+                safe(product.getPromocion())
+        );
+
+        String[] productWords = searchableText.split("\\s+");
+
+        for (String searchToken : searchTokens) {
+            if (searchToken.isBlank()) {
+                continue;
+            }
+
+            boolean tokenMatched = false;
+
+            for (String productWord : productWords) {
+                if (isSimilar(searchToken, productWord)) {
+                    tokenMatched = true;
+                    break;
+                }
+            }
+
+            if (!tokenMatched) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isSimilar(String searchToken, String productWord) {
+        if (productWord.isBlank()) {
+            return false;
+        }
+
+        if (productWord.contains(searchToken)) {
+            return true;
+        }
+
+        if (productWord.startsWith(searchToken)) {
+            return true;
+        }
+
+        if (searchToken.startsWith(productWord)) {
+            return true;
+        }
+
+        int distance = levenshteinDistance(searchToken, productWord);
+        int maxDistance = getMaxDistance(searchToken);
+
+        return distance <= maxDistance;
+    }
+
+    private int getMaxDistance(String word) {
+        int length = word.length();
+
+        if (length <= 2) {
+            return 0;
+        }
+
+        if (length <= 6) {
+            return 2;
+        }
+
+        return 3;
+    }
+
+    private String normalizeText(String text) {
+        String normalized = Normalizer
+                .normalize(text.toLowerCase(), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+
+        return normalized
+                .replaceAll("[^a-z0-9\\s]", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
+    }
+
+    private int levenshteinDistance(String firstWord, String secondWord) {
+        int[][] matrix = new int[firstWord.length() + 1][secondWord.length() + 1];
+
+        for (int i = 0; i <= firstWord.length(); i++) {
+            matrix[i][0] = i;
+        }
+
+        for (int j = 0; j <= secondWord.length(); j++) {
+            matrix[0][j] = j;
+        }
+
+        for (int i = 1; i <= firstWord.length(); i++) {
+            for (int j = 1; j <= secondWord.length(); j++) {
+                int cost = firstWord.charAt(i - 1) == secondWord.charAt(j - 1)
+                        ? 0
+                        : 1;
+
+                matrix[i][j] = Math.min(
+                        Math.min(
+                                matrix[i - 1][j] + 1,
+                                matrix[i][j - 1] + 1
+                        ),
+                        matrix[i - 1][j - 1] + cost
+                );
+            }
+        }
+
+        return matrix[firstWord.length()][secondWord.length()];
     }
 
     public List<ProductDocument> seedProducts() {
