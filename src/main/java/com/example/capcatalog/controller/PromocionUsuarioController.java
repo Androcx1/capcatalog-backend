@@ -1,6 +1,7 @@
 package com.example.capcatalog.controller;
 
 import com.example.capcatalog.dto.PromocionAceptadaRequest;
+import com.example.capcatalog.dto.PromocionRechazadaRequest;
 import com.example.capcatalog.entity.PromocionUsuario;
 import com.example.capcatalog.service.PromocionUsuarioService;
 
@@ -21,6 +22,7 @@ public class PromocionUsuarioController {
         this.service = service;
     }
 
+
     @PostMapping("/aceptar")
     public ResponseEntity<PromocionUsuario> aceptarPromocion(
             @RequestBody PromocionAceptadaRequest request
@@ -28,6 +30,20 @@ public class PromocionUsuarioController {
 
         PromocionUsuario guardada =
                 service.aceptarPromocion(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(guardada);
+    }
+
+
+    @PostMapping("/rechazar")
+    public ResponseEntity<PromocionUsuario> rechazarPromocion(
+            @RequestBody PromocionRechazadaRequest request
+    ) {
+
+        PromocionUsuario guardada =
+                service.rechazarPromocion(request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

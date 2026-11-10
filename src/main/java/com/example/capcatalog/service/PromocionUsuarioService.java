@@ -1,8 +1,10 @@
 package com.example.capcatalog.service;
 
 import com.example.capcatalog.dto.PromocionAceptadaRequest;
+import com.example.capcatalog.dto.PromocionRechazadaRequest;
 import com.example.capcatalog.entity.PromocionUsuario;
 import com.example.capcatalog.repository.PromocionUsuarioRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -54,10 +56,10 @@ public class PromocionUsuarioService {
                 request.fechaCaducidad()
         );
 
-        // La decisión la controla el backend
-        promocion.setDecision("ACEPTADA");
+        promocion.setDecision(
+                "ACEPTADA"
+        );
 
-        // Fecha automática del servidor
         promocion.setFechaDecision(
                 OffsetDateTime.now()
         );
@@ -66,20 +68,88 @@ public class PromocionUsuarioService {
                 OffsetDateTime.now()
         );
 
-        // Estado dependiendo de la fecha de caducidad
+        promocion.setEstado(
+                calcularEstado(
+                        request.fechaCaducidad()
+                )
+        );
+
+        return repository.save(promocion);
+    }
+
+
+    public PromocionUsuario rechazarPromocion(
+            PromocionRechazadaRequest request
+    ) {
+
+        PromocionUsuario promocion =
+                new PromocionUsuario();
+
+        promocion.setIdPromocion(
+                request.idPromocion()
+        );
+
+        promocion.setProducto(
+                request.producto()
+        );
+
+        promocion.setDescripcion(
+                request.descripcion()
+        );
+
+        promocion.setDescuento(
+                request.descuento()
+        );
+
+        promocion.setPrecioAnterior(
+                request.precioAnterior()
+        );
+
+        promocion.setPrecioOferta(
+                request.precioOferta()
+        );
+
+        promocion.setFechaCaducidad(
+                request.fechaCaducidad()
+        );
+
+        promocion.setDecision(
+                "RECHAZADA"
+        );
+
+        promocion.setFechaDecision(
+                OffsetDateTime.now()
+        );
+
+        promocion.setCreatedAt(
+                OffsetDateTime.now()
+        );
+
+        promocion.setEstado(
+                calcularEstado(
+                        request.fechaCaducidad()
+                )
+        );
+
+        return repository.save(promocion);
+    }
+
+
+    private String calcularEstado(
+            LocalDate fechaCaducidad
+    ) {
+
         if (
-                request.fechaCaducidad() != null &&
-                request.fechaCaducidad().isBefore(LocalDate.now())
+                fechaCaducidad != null &&
+                fechaCaducidad.isBefore(
+                        LocalDate.now()
+                )
         ) {
 
-            promocion.setEstado("CADUCADA");
-
-        } else {
-
-            promocion.setEstado("VIGENTE");
+            return "CADUCADA";
 
         }
 
-        return repository.save(promocion);
+        return "VIGENTE";
     }
 }
