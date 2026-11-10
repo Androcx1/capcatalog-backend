@@ -16,23 +16,37 @@
     <artifactId>capcatalog</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>capcatalog</name>
-    <description>Backend para buscador con Elasticsearch de Cap Catalog</description>
+    <description>Backend de Cap Catalog con Elasticsearch y PostgreSQL</description>
 
     <properties>
         <java.version>21</java.version>
     </properties>
 
     <dependencies>
+
         <!-- Spring Web para crear controladores REST -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Spring Data Elasticsearch para conectar con Elasticsearch -->
+        <!-- Spring Data Elasticsearch -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
+
+        <!-- Spring Data JPA para PostgreSQL / Supabase -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- Driver PostgreSQL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Tests -->
@@ -41,15 +55,20 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
+
         <plugins>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
         </plugins>
+
     </build>
 
 </project>
