@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 public class PromocionUsuarioService {
@@ -21,6 +22,19 @@ public class PromocionUsuarioService {
         this.repository = repository;
     }
 
+
+    /*
+     * OBTENER TODAS LAS DECISIONES
+     */
+    public List<PromocionUsuario> obtenerTodas() {
+
+        return repository.findAll();
+    }
+
+
+    /*
+     * ACEPTAR PROMOCIÓN
+     */
     public PromocionUsuario aceptarPromocion(
             PromocionAceptadaRequest request
     ) {
@@ -74,10 +88,15 @@ public class PromocionUsuarioService {
                 )
         );
 
-        return repository.save(promocion);
+        return repository.save(
+                promocion
+        );
     }
 
 
+    /*
+     * RECHAZAR PROMOCIÓN
+     */
     public PromocionUsuario rechazarPromocion(
             PromocionRechazadaRequest request
     ) {
@@ -131,10 +150,15 @@ public class PromocionUsuarioService {
                 )
         );
 
-        return repository.save(promocion);
+        return repository.save(
+                promocion
+        );
     }
 
 
+    /*
+     * CALCULAR ESTADO DE LA PROMOCIÓN
+     */
     private String calcularEstado(
             LocalDate fechaCaducidad
     ) {
@@ -147,7 +171,6 @@ public class PromocionUsuarioService {
         ) {
 
             return "CADUCADA";
-
         }
 
         return "VIGENTE";
